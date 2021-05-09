@@ -30,6 +30,7 @@ def change_coords_apple():
 def check_apple():
     if canvas.coords(head) == canvas.coords(apple):
         return True
+    return False
 
 def check_collision():
     for i in body:
