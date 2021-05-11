@@ -4,14 +4,36 @@ from random import randint
 
 window_width = 1000
 window_height = 600
-size = 20
-map_width = window_width / size
-map_height = window_height / size
-max_coord_x = window_width - size
-max_coord_y = window_height - size
-direction = "Right"
 delay = 200
-lenght = 3
+lenght = 6
+direction = "Right"
+
+def gameover():
+    canvas.destroy()
+    tkinter.Label(text=f"Your score is {lenght}", font="Arial 28").pack()
+
+def click():
+    global size
+    global map_width
+    global map_height
+    global max_coord_x
+    global max_coord_y
+    size = map_size.get()
+    map_width = window_width / size
+    map_height = window_height / size
+    max_coord_x = window_width - size
+    max_coord_y = window_height - size
+    frame.destroy()
+    start()
+
+def start():
+    global canvas
+    canvas = tkinter.Canvas(root, width=window_width, height=window_height, bg="#000", highlightthickness=0)
+    canvas.pack()
+    canvas.focus_set()
+    canvas.bind("<Key>", change_direction)
+    spawn_actors()
+    move()
 
 def add_body():
     x1, y1, x2, y2 = canvas.coords(body[-1])
@@ -71,24 +93,25 @@ def move():
         if canvas.coords(head)[0] == max_coord_x:
             canvas.move(head, -max_coord_x, 0)
         else:
-            canvas.move(head, 20, 0)
+            canvas.move(head, size, 0)
     elif direction == "Left":
         if canvas.coords(head)[0] == 0:
             canvas.move(head, max_coord_x, 0)
         else:
-            canvas.move(head, -20, 0)
+            canvas.move(head, -size, 0)
     elif direction == "Up":
         if canvas.coords(head)[1] == 0:
             canvas.move(head, 0, max_coord_y)
         else:
-            canvas.move(head, 0, -20)
+            canvas.move(head, 0, -size)
     elif direction == "Down":
         if canvas.coords(head)[1] == max_coord_y:
             canvas.move(head, 0, -max_coord_y)
         else:
-            canvas.move(head, 0, 20)
+            canvas.move(head, 0, size)
     move_body(x1, y1, x2, y2)
     if check_collision():
+        gameover()
         return False
     if check_apple():
         change_coords_apple()
@@ -101,12 +124,24 @@ root.title("Snake")
 root.resizable(False, False)
 root.geometry(f"{window_width}x{window_height}")
 
-canvas = tkinter.Canvas(root, width=window_width, height=window_height, bg="#000", highlightthickness=0)
-canvas.pack()
-canvas.focus_set()
-canvas.bind("<Key>", change_direction)
+frame = tkinter.Frame(root)
+frame.pack()
 
-spawn_actors()
-move()
+label = tkinter.Label(frame, text="Select size of map: ", font="Arial 28")
+label.pack()
+
+map_size = tkinter.IntVar()
+map_size.set(25)
+
+small = tkinter.Radiobutton(frame, text='small', font="Arial 22", variable=map_size, value=50)
+normal = tkinter.Radiobutton(frame, text='normal', font="Arial 22", variable=map_size, value=25)
+big = tkinter.Radiobutton(frame, text='big', font="Arial 22", variable=map_size, value=20)
+
+small.pack()
+normal.pack()
+big.pack()
+
+button = tkinter.Button(frame, text="Play", font="Arial 22", padx="40", command=click)
+button.pack()
 
 root.mainloop()
