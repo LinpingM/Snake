@@ -5,30 +5,63 @@ from random import randint
 window_width = 1000
 window_height = 600
 delay = 200
-lenght = 6
-direction = "Right"
+
+def default():
+    global lenght
+    global current_direction
+    global direction
+    lenght = 6
+    current_direction = "Right"
+    direction = current_direction
+
+def forget_play():
+    map_size_label.place_forget()
+    small.place_forget()
+    normal.place_forget()
+    big.place_forget()
+    play_button.place_forget()
+
+def forget_gameover():
+    gameover_label.place_forget()
+    gameover_button_to_menu.place_forget()
+    gameover_button_again.place_forget()
+
+def menu(x=0):
+    if x: forget_gameover()
+    map_size_label.place(anchor=tkinter.CENTER, relx=0.5, rely=0.25)
+    small.place(anchor=tkinter.W, relx=0.45, rely=0.35)
+    normal.place(anchor=tkinter.W, relx=0.45, rely=0.45)
+    big.place(anchor=tkinter.W, relx=0.45, rely=0.55)
+    play_button.place(anchor=tkinter.CENTER, relx=0.5, rely=0.7)
+
+def again():
+    forget_gameover()
+    start()
 
 def gameover():
-    canvas.destroy()
-    tkinter.Label(text=f"Your score is {lenght}", font="Arial 28").pack()
+    canvas.delete("all")
+    canvas.pack_forget()
+    gameover_label["text"] = f"Your score is {lenght}"
+    gameover_label.place(anchor=tkinter.CENTER, relx=0.5, rely=0.40)
+    gameover_button_to_menu.place(anchor=tkinter.CENTER, relx=0.3, rely=0.6)
+    gameover_button_again.place(anchor=tkinter.CENTER, relx=0.7, rely=0.6)
 
-def click():
+def play():
     global size
     global map_width
     global map_height
     global max_coord_x
     global max_coord_y
-    size = map_size.get()
+    size = square_size.get()
     map_width = window_width / size
     map_height = window_height / size
     max_coord_x = window_width - size
     max_coord_y = window_height - size
-    frame.destroy()
+    forget_play()
     start()
 
 def start():
-    global canvas
-    canvas = tkinter.Canvas(root, width=window_width, height=window_height, bg="#000", highlightthickness=0)
+    default()
     canvas.pack()
     canvas.focus_set()
     canvas.bind("<Key>", change_direction)
@@ -50,7 +83,9 @@ def change_coords_apple():
     canvas.coords(apple, x1, y1, x2, y2)
 
 def check_apple():
+    global lenght
     if canvas.coords(head) == canvas.coords(apple):
+        lenght += 1
         return True
     return False
 
@@ -68,10 +103,10 @@ def move_body(x1, y1, x2, y2):
 
 def change_direction(event):
     global direction
-    if event.keysym == "Right" and direction != "Left":   direction = event.keysym
-    elif event.keysym == "Left" and direction != "Right": direction = event.keysym
-    elif event.keysym == "Up" and direction != "Down":    direction = event.keysym
-    elif event.keysym == "Down" and direction != "Up":    direction = event.keysym
+    if event.keysym == "Right" and current_direction != "Left" and current_direction != "Right":  direction = event.keysym
+    elif event.keysym == "Left" and current_direction != "Right" and current_direction != "Left": direction = event.keysym
+    elif event.keysym == "Up" and current_direction != "Down" and current_direction != "Up":      direction = event.keysym
+    elif event.keysym == "Down" and current_direction != "Up" and current_direction != "Down":    direction = event.keysym
 
 def spawn_actors():
     global head
@@ -88,6 +123,7 @@ def spawn_actors():
     apple = canvas.create_rectangle(x1, y1, x2, y2, fill="#EE0000")
 
 def move():
+    global current_direction
     x1, y1, x2, y2 = canvas.coords(head)
     if direction == "Right":
         if canvas.coords(head)[0] == max_coord_x:
@@ -110,6 +146,7 @@ def move():
         else:
             canvas.move(head, 0, size)
     move_body(x1, y1, x2, y2)
+    current_direction = direction
     if check_collision():
         gameover()
         return False
@@ -123,25 +160,25 @@ root = tkinter.Tk()
 root.title("Snake")
 root.resizable(False, False)
 root.geometry(f"{window_width}x{window_height}")
+root["bg"] = "#000"
 
-frame = tkinter.Frame(root)
-frame.pack()
+map_size_label = tkinter.Label(root, text="Select size of map: ", font="Arial 28 bold", fg="#62d2a2", bg="#000")
 
-label = tkinter.Label(frame, text="Select size of map: ", font="Arial 28")
-label.pack()
+square_size = tkinter.IntVar()
+square_size.set(25)
 
-map_size = tkinter.IntVar()
-map_size.set(25)
+small = tkinter.Radiobutton(root, text='small', font="Arial 22 bold", variable=square_size, value=50, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
+normal = tkinter.Radiobutton(root, text='normal', font="Arial 22 bold", variable=square_size, value=25, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
+big = tkinter.Radiobutton(root, text='big', font="Arial 22 bold", variable=square_size, value=20, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
 
-small = tkinter.Radiobutton(frame, text='small', font="Arial 22", variable=map_size, value=50)
-normal = tkinter.Radiobutton(frame, text='normal', font="Arial 22", variable=map_size, value=25)
-big = tkinter.Radiobutton(frame, text='big', font="Arial 22", variable=map_size, value=20)
+play_button = tkinter.Button(root, text="Play", font="Arial 22 bold", padx="40", command=play, fg="#62d2a2", bg="#222222", relief=tkinter.RIDGE)
 
-small.pack()
-normal.pack()
-big.pack()
+menu()
 
-button = tkinter.Button(frame, text="Play", font="Arial 22", padx="40", command=click)
-button.pack()
+canvas = tkinter.Canvas(root, width=window_width, height=window_height, bg="#000", highlightthickness=0)
+
+gameover_label = tkinter.Label(font="Arial 28 bold", fg="#62d2a2", bg="#000")
+gameover_button_to_menu = tkinter.Button(root, text="Menu", font="Arial 22 bold", padx="40", command=lambda x = 1: menu(x), fg="#62d2a2", bg="#222222", relief=tkinter.RIDGE)
+gameover_button_again = tkinter.Button(root, text="Again", font="Arial 22 bold", padx="40", command=again, fg="#62d2a2", bg="#222222", relief=tkinter.RIDGE)
 
 root.mainloop()
