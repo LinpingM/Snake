@@ -10,7 +10,7 @@ def default():
     global lenght
     global current_direction
     global direction
-    lenght = 6
+    lenght = 3
     current_direction = "Right"
     direction = current_direction
 
@@ -41,7 +41,7 @@ def again():
 def gameover():
     canvas.delete("all")
     canvas.pack_forget()
-    gameover_label["text"] = f"Your score is {lenght}"
+    gameover_label["text"] = f"Your lenght is {lenght}"
     gameover_label.place(anchor=tkinter.CENTER, relx=0.5, rely=0.40)
     gameover_button_to_menu.place(anchor=tkinter.CENTER, relx=0.3, rely=0.6)
     gameover_button_again.place(anchor=tkinter.CENTER, relx=0.7, rely=0.6)
@@ -145,31 +145,32 @@ def move():
             canvas.move(head, 0, -max_coord_y)
         else:
             canvas.move(head, 0, size)
-    move_body(x1, y1, x2, y2)
     current_direction = direction
     if check_collision():
         gameover()
         return False
     if check_apple():
-        change_coords_apple()
         add_body()
+        change_coords_apple()
+    move_body(x1, y1, x2, y2)
     root.after(delay, move)
 
 
 root = tkinter.Tk()
 root.title("Snake")
 root.resizable(False, False)
+root.wm_attributes("-topmost", 1)
 root.geometry(f"{window_width}x{window_height}")
 root["bg"] = "#000"
 
 map_size_label = tkinter.Label(root, text="Select size of map: ", font="Arial 28 bold", fg="#62d2a2", bg="#000")
 
 square_size = tkinter.IntVar()
-square_size.set(25)
+square_size.set(50)
 
-small = tkinter.Radiobutton(root, text='small', font="Arial 22 bold", variable=square_size, value=50, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
-normal = tkinter.Radiobutton(root, text='normal', font="Arial 22 bold", variable=square_size, value=25, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
-big = tkinter.Radiobutton(root, text='big', font="Arial 22 bold", variable=square_size, value=20, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
+small = tkinter.Radiobutton(root, text='small', font="Arial 22 bold", variable=square_size, value=100, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
+normal = tkinter.Radiobutton(root, text='normal', font="Arial 22 bold", variable=square_size, value=50, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
+big = tkinter.Radiobutton(root, text='big', font="Arial 22 bold", variable=square_size, value=25, fg="#fff", bg="#000", activebackground="#000", activeforeground="#fff", selectcolor="#222222")
 
 play_button = tkinter.Button(root, text="Play", font="Arial 22 bold", padx="40", command=play, fg="#62d2a2", bg="#222222", relief=tkinter.RIDGE)
 
